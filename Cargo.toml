@@ -1,0 +1,16 @@
+[package]
+name = "edgecompare"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+fraction = "0.13"
+ordered-float = "3.6"
+itertools = "0.10.5"
+num-traits = "0.2"
+pico-args = "0.5.0"
+
+[dependencies.rug]
+version = "1.19"
+default-features = false
+features = ["float"]
