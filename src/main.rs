@@ -20,10 +20,6 @@ pub type Fraction = GenericFraction<u64>;
 type MinNotNan = Reverse<NotNan<f64>>;
 
 // this is a translation of the existing Python progressive edge search code by Marek and me into Rust
-// I will try to optimize little things where possible
-// coding in Rust is going kind of slow and challenging
-// one big change is variable scope
-// also, list comprehensions look less clean when translated literally to Rust
 
 const HELP: &str = "\
 Edgecompare
@@ -139,18 +135,6 @@ fn parse_polygon_list(s: &str) -> Result<(Vec<u8>, Vec<Vec<u8>>), &'static str> 
         polys.push(p_list);
     }
     Ok((side_ratios, polys))
-        // let str_split: Vec<Vec<String>> = s.split("; ")
-        //     .map(|s| s.split_whitespace().map(String::from).collect())
-        //     .collect();
-        // let side_ratios = str_split.iter()
-        //     .map(|siter| siter[0].to_string().parse::<u8>())
-        //     .collect::<Result<Vec<_>, _>>().map_err(|_| "Unable to parse side ratio")?;
-        // let polys = str_split.iter()
-        //     .map(|siter| siter[1].split(",")
-        //             .map(|x| x.parse::<u8>())
-        //             .collect::<Result<Vec<_>, _>>())
-        //     .collect::<Result<Vec<_>, _>>().map_err(|_| "Unable to parse polygon side number")?;
-        // Ok((side_ratios, polys))
 }
 
 fn parse_angle_symbol_raw(s: &str) -> Result<(u8, u8), &'static str> {
@@ -220,17 +204,6 @@ struct ProgressiveEdgeSearch {
 }
 
 impl ProgressiveEdgeSearch {
-    // pub fn new(side_config_str: String, limits: SearchLimits, fname: String) -> Self {
-    //     let str_split: Vec<Vec<String>> = side_config_str.split("; ")
-    //         .map(|s| s.split_whitespace().map(String::from).collect())
-    //         .collect();
-    //     let side_ratios = str_split.iter()
-    //         .map(|siter| siter[0].to_string().parse::<u8>().unwrap())
-    //         .collect::<Vec<_>>();
-    //     let polys = str_split.iter()
-    //         .map(|siter| siter[1].split(",").map(|x| x.parse::<u8>().unwrap()).collect::<Vec<_>>())
-    //         .collect::<Vec<_>>();
-
     pub fn new(side_ratios: Vec<u8>, polys: Vec<Vec<u8>>, limits: SearchLimits, outfile: PathBuf) -> Self {
         // designate the index used to represent apeirogons
         let apro_idx = polys.iter().flatten().max().unwrap() + 1;
@@ -331,7 +304,6 @@ impl ProgressiveEdgeSearch {
             xh = (xh.acosh() / (*rmin as f64)).cosh();
         }
 
-        // closure
         let angle_c = |x| vertex_angle(&ratios, &cosines, &ns, x) - 2.0*PI;
 
         let mut fl = angle_c(xl);
@@ -527,14 +499,14 @@ impl ProgressiveEdgeSearch {
                 let t2 = std::time::Instant::now();
                 let timeval = t2.duration_since(t1).as_secs_f64();
                 println!("{timeval:.2} s, c={sol}, current {}, cosh(e/2)={cur_m}, buffer {}", self.fmt_atypes(&cur_v), vertices.len());
+
+                // write the results to file once in a while
+                self.writer.flush().expect("Unable to write data");
             }
             if cur_m - curmin_m > self.m_tolerance {
                 if curmin_m > 0.0 && curmin.len() > 1 {
                     // println!("#{coincidence} vertices: {}", self.format_atypess(&curmin));
                     // coincidence += 1;
-                    // if coincidence > 10 {
-                    //     break;
-                    // }
                     self.processedge(curmin.drain(..).collect(), &curmin_m);
                 } else {
                     curmin.clear();
@@ -557,10 +529,11 @@ impl ProgressiveEdgeSearch {
 
         if Float::with_val(PREC, e_max-e_min) > group_threshold {
             if vs.len() > 2 {
-                println!("? {}", self.fmt_atypess(&vs));
-                for edge in edges.iter() {
-                    println!("{:?}", edge);
-                }
+                // println!("{}? {}", edges.len(), self.fmt_atypess(&vs));
+
+                // for edge in edges.iter() {
+                //     println!("{:?}", edge);
+                // }
 
                 self.processedge_grouped(vs, edges, group_threshold);
             }
@@ -628,8 +601,6 @@ impl ProgressiveEdgeSearch {
 
         if increment_mult {
             let mut v2 = v.clone();
-            // v2.remove(v2.len()-1);
-            // v2.push(IndexedAngleType::new(l_ratioi, l_pidx, l_mult+1, self));
             v2.last_mut().unwrap().atype.mult += 1;
             children.push(v2);
         }
@@ -653,8 +624,6 @@ impl ProgressiveEdgeSearch {
         }
         if replace_p_new_group {
             let mut v2 = v.clone();
-            // v2.remove(v2.len()-1);
-            // v2.push(IndexedAngleType::new(l_ratioi, l_pidx, l_mult-1, self));
             v2.last_mut().unwrap().atype.mult -= 1;
             v2.push(IndexedAngleType::new(l_ratioi, l_pidx+1, 1, self));
             children.push(v2);
