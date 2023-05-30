@@ -6,7 +6,7 @@ This is a search program for edge lengths of hybrid Archimedean tilings of the h
 On the Euclidean plane, we can make tessellations by putting 6 regular triangles around each vertex, or by putting 4 squares around each vertex, or 3 regular hexagons.  If we put even more regular polygons around a vertex, this may form a [tiling of the hyperbolic plane](https://en.wikipedia.org/wiki/Template:Regular_hyperbolic_tiling_table).  The hyperbolic plane has constant negative curvature. For a specific configuration of regular polygons to tile the hyperbolic plane, the polygons' edge length must take on a specific value.
 
 For a tiling with $q$ regular $p$-gons around each vertex, the side length $s$ of the polygons must be
-$$ s = 2 \mathrm{arcosh}\left( \frac{\cos \frac{\pi}{p} }{\sin \frac{\pi}{q} } \right). $$
+$$s = 2 \mathrm{arcosh}\left( \frac{\cos \frac{\pi}{p} }{\sin \frac{\pi}{q} } \right).$$
 
 The interior angles $\theta = 2\pi/q$ must satisfy
 $$\theta = 2 \arcsin \left( \frac{\cos \frac{\pi}{p}}{\cosh \frac{s}{2}} \right).$$
